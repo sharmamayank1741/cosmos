@@ -1,134 +1,102 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-// Part of Cosmos by OpenGenus Foundation
-// Stack type
-struct Stack
+//Solution Q2 : Infix to postfix expression
+#include<bits/stdc++.h>
+using namespace std;
+#define max 50
+class stk
 {
-    int top;
-    unsigned capacity;
-    int* array;
+	int ctop;
+	char arr[max];
+	public :
+	stk()  {ctop=-1;};
+	void push(char x);
+	void pop();
+	bool isempty();
+	char top();
 };
-
-// Stack Operations
-struct Stack* createStack( unsigned capacity )
+void stk::push(char x)
 {
-    struct Stack* stack = (struct Stack*) malloc(sizeof(struct Stack));
-
-    if (!stack)
-        return NULL;
-
-    stack->top = -1;
-    stack->capacity = capacity;
-
-    stack->array = (int*) malloc(stack->capacity * sizeof(int));
-
-    if (!stack->array)
-        return NULL;
-    return stack;
+	ctop++;
+	arr[ctop]=x;	
 }
-int isEmpty(struct Stack* stack)
+void stk::pop()
 {
-    return stack->top == -1;
+		ctop--;
 }
-char peek(struct Stack* stack)
+bool stk::isempty()
 {
-    return stack->array[stack->top];
+if(ctop==-1)	
+	return true;
+	else return false;
 }
-char pop(struct Stack* stack)
+char stk::top()
 {
-    if (!isEmpty(stack))
-        return stack->array[stack->top--];
-    return '$';
+
+	if(!isempty())
+	return arr[ctop];
+	else return '\0';
 }
-void push(struct Stack* stack, char op)
-{
-    stack->array[++stack->top] = op;
-}
+string INF_T_PF(string exp)
+	{
+	stk s;
+	string result;
+	for(int i=0;i<exp.size();i++)
+	{
+		switch(exp[i])
+		{
+			case '(' : s.push('(');
+							 break;
 
+			case '/'  : s.push('/');
+							 break;
 
-// A utility function to check if the given character is operand
-int isOperand(char ch)
-{
-    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
-}
+			case '*'  : while(s.top()=='/')
+						{
+							result+=s.top();
+							s.pop();
+						}
+						s.push('*');
+						break;
 
-// A utility function to return precedence of a given operator
-// Higher returned value means higher precedence
-int Prec(char ch)
-{
-    switch (ch)
-    {
-    case '+':
-    case '-':
-        return 1;
+			case '+'   : while(s.top()=='*' || s.top()=='/')
+						 {
+							result+=s.top();
+							s.pop();
+						 }
+						 s.push('+');
+						 break;
 
-    case '*':
-    case '/':
-        return 2;
+			case '-'	: while(s.top()=='+' || s.top()=='*' || s.top()=='/')
+							{
+							result+=s.top();
+							s.pop();
+							}
+							s.push('-');
+							break;
+			case ')'	:  while(s.top()!='(')
 
-    case '^':
-        return 3;
-    }
-    return -1;
-}
-
-
-// The main function that converts given infix expression
-// to postfix expression.
-int infixToPostfix(char* exp)
-{
-    int i, k;
-
-    // Create a stack of capacity equal to expression size
-    struct Stack* stack = createStack(strlen(exp));
-    if (!stack) // See if stack was created successfully
-        return -1;
-
-    for (i = 0, k = -1; exp[i]; ++i)
-    {
-        // If the scanned character is an operand, add it to output.
-        if (isOperand(exp[i]))
-            exp[++k] = exp[i];
-
-        // If the scanned character is an ‘(‘, push it to the stack.
-        else if (exp[i] == '(')
-            push(stack, exp[i]);
-
-        // If the scanned character is an ‘)’, pop and output from the stack
-        // until an ‘(‘ is encountered.
-        else if (exp[i] == ')')
-        {
-            while (!isEmpty(stack) && peek(stack) != '(')
-                exp[++k] = pop(stack);
-            if (!isEmpty(stack) && peek(stack) != '(')
-                return -1; // invalid expression
-            else
-                pop(stack);
-        }
-        else // an operator is encountered
-        {
-            while (!isEmpty(stack) && Prec(exp[i]) <= Prec(peek(stack)))
-                exp[++k] = pop(stack);
-            push(stack, exp[i]);
-        }
-
-    }
-
-    // pop all the operators from the stack
-    while (!isEmpty(stack))
-        exp[++k] = pop(stack );
-
-    exp[++k] = '\0';
-    printf( "%sn", exp );
-
-    return 0;
-}
-
-// Driver program to test above functions
+							{
+								result+=s.top();
+								s.pop();
+							}
+							s.pop();
+							break;
+			default      :  result+=exp[i];
+			}
+	}
+	while(!s.isempty())
+	{
+		result+=s.top();
+		s.pop();
+	}
+	return result;
+	}
 int main()
 {
-    char exp[] = "a+b*(c^d-e)^(f+g*h)-i";
-    infixToPostfix(exp);
-    return 0;
+	string exp;
+	cout<<"Input Expression : ";
+	cin>>exp;
+	string res=INF_T_PF(exp);
+	cout<<"\nPostfix Form : "<<res;
+return 0;
 }
+
